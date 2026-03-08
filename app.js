@@ -144,6 +144,7 @@ const nonMetalSymbols = new Set([
 ]);
 
 const bondArea = document.getElementById("bondArea");
+const trashBin = document.getElementById("trashBin");
 const table = document.getElementById("periodicTable");
 const bondType = document.getElementById("bondType");
 const formula = document.getElementById("formula");
@@ -151,7 +152,8 @@ const bondDescription = document.getElementById("bondDescription");
 const properties = document.getElementById("properties");
 const resetBtn = document.getElementById("resetBtn");
 
-const selectedSlots = new Array(4).fill(null);
+const selectedElements = [];
+const maxNodes = 8;
 
 function getCategory(element) {
   if (metalloidSymbols.has(element.symbol)) {
@@ -192,48 +194,116 @@ function renderTable() {
   grid.id = "periodicTable";
 }
 
-function setupSlots() {
-  bondArea.querySelectorAll(".slot").forEach((slot) => {
-    slot.addEventListener("dragover", (event) => {
-      event.preventDefault();
-      slot.classList.add("drag-over");
-    });
+function setupCanvas() {
+  bondArea.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    bondArea.classList.add("drag-over");
+  });
 
-    slot.addEventListener("dragleave", () => {
-      slot.classList.remove("drag-over");
-    });
+  bondArea.addEventListener("dragleave", () => {
+    bondArea.classList.remove("drag-over");
+  });
 
-    slot.addEventListener("drop", (event) => {
-      event.preventDefault();
-      slot.classList.remove("drag-over");
-      const symbol = event.dataTransfer.getData("text/plain");
-      const element = elements.find((item) => item.symbol === symbol);
-      if (!element) return;
-      const index = Number(slot.dataset.slot);
-      selectedSlots[index] = element;
-      renderSlots();
-      updateBonding();
-    });
+  bondArea.addEventListener("drop", (event) => {
+    event.preventDefault();
+    bondArea.classList.remove("drag-over");
+    const symbol = event.dataTransfer.getData("text/plain");
+    const element = elements.find((item) => item.symbol === symbol);
+    if (!element) return;
+    if (selectedElements.length >= maxNodes) return;
+    const rect = bondArea.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    addBondNode(element, x, y);
+    updateBonding();
+  });
+
+  trashBin.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    trashBin.classList.add("active");
+  });
+
+  trashBin.addEventListener("dragleave", () => {
+    trashBin.classList.remove("active");
+  });
+
+  trashBin.addEventListener("drop", (event) => {
+    event.preventDefault();
+    trashBin.classList.remove("active");
+    const id = event.dataTransfer.getData("text/plain");
+    const node = bondArea.querySelector(`[data-node-id="${id}"]`);
+    if (!node) return;
+    const idValue = node.dataset.nodeId;
+    const index = selectedElements.findIndex((item) => item.id === idValue);
+    if (index >= 0) {
+      selectedElements.splice(index, 1);
+    }
+    node.remove();
+    updateBonding();
   });
 }
 
-function renderSlots() {
-  bondArea.querySelectorAll(".slot").forEach((slot) => {
-    const index = Number(slot.dataset.slot);
-    const element = selectedSlots[index];
-    if (!element) {
-      slot.classList.remove("filled");
-      slot.innerHTML = "+";
-      return;
-    }
+function addBondNode(element, x, y) {
+  const node = document.createElement("div");
+  node.className = "bond-node";
+  node.dataset.symbol = element.symbol;
+  node.dataset.number = String(element.number);
+  node.dataset.nodeId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  node.draggable = true;
+  node.innerHTML = `
+    <div>
+      <div class="symbol">${element.symbol}</div>
+      <div class="number">${element.number}</div>
+    </div>
+  `;
 
-    slot.classList.add("filled");
-    slot.innerHTML = `
-      <div>
-        <div class="symbol">${element.symbol}</div>
-        <div class="number">${element.number}</div>
-      </div>
-    `;
+  const size = 72;
+  const rect = bondArea.getBoundingClientRect();
+  const clampedX = Math.min(Math.max(x - size / 2, 0), rect.width - size);
+  const clampedY = Math.min(Math.max(y - size / 2, 0), rect.height - size);
+  node.style.left = `${clampedX}px`;
+  node.style.top = `${clampedY}px`;
+
+  node.addEventListener("dragstart", (event) => {
+    event.dataTransfer.setData("text/plain", node.dataset.nodeId);
+  });
+
+  enableNodeDrag(node);
+  bondArea.appendChild(node);
+  selectedElements.push({ id: node.dataset.nodeId, element });
+}
+
+function enableNodeDrag(node) {
+  let isDragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  node.addEventListener("pointerdown", (event) => {
+    isDragging = true;
+    node.setPointerCapture(event.pointerId);
+    const rect = node.getBoundingClientRect();
+    offsetX = event.clientX - rect.left;
+    offsetY = event.clientY - rect.top;
+  });
+
+  node.addEventListener("pointermove", (event) => {
+    if (!isDragging) return;
+    const areaRect = bondArea.getBoundingClientRect();
+    const size = 72;
+    const x = event.clientX - areaRect.left - offsetX;
+    const y = event.clientY - areaRect.top - offsetY;
+    const clampedX = Math.min(Math.max(x, 0), areaRect.width - size);
+    const clampedY = Math.min(Math.max(y, 0), areaRect.height - size);
+    node.style.left = `${clampedX}px`;
+    node.style.top = `${clampedY}px`;
+  });
+
+  node.addEventListener("pointerup", () => {
+    isDragging = false;
+  });
+
+  node.addEventListener("pointerleave", () => {
+    isDragging = false;
   });
 }
 
@@ -333,7 +403,7 @@ function getProperties(choices, bondInfo) {
 }
 
 function updateBonding() {
-  const choices = selectedSlots.filter(Boolean);
+  const choices = selectedElements.map((item) => item.element);
   if (choices.length === 0) {
     bondType.textContent = "-";
     formula.textContent = "-";
@@ -352,14 +422,13 @@ function updateBonding() {
 }
 
 function resetAll() {
-  selectedSlots.fill(null);
-  renderSlots();
+  selectedElements.length = 0;
+  bondArea.querySelectorAll(".bond-node").forEach((node) => node.remove());
   updateBonding();
 }
 
 resetBtn.addEventListener("click", resetAll);
 
 renderTable();
-setupSlots();
-renderSlots();
+setupCanvas();
 updateBonding();

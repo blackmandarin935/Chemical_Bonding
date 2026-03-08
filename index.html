@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Yeseva+One&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -42,20 +42,24 @@
             <h2>주기율표</h2>
             <p>원소를 드래그해서 결합 공간에 놓아보세요.</p>
           </div>
-          <div id="periodicTable" class="table"></div>
+          <div class="table-wrap">
+            <div id="periodicTable" class="table"></div>
+          </div>
         </section>
 
         <section class="panel" aria-label="결합 공간">
           <div class="panel-header">
             <h2>결합 공간</h2>
-            <p>최대 4개의 원소를 결합해 간단한 분자를 만들 수 있어요.</p>
+            <p>최대 8개의 원소를 결합해 간단한 분자를 만들 수 있어요.</p>
           </div>
-          <div id="bondArea" class="bond-area">
-            <div class="slot" data-slot="0">+</div>
-            <div class="slot" data-slot="1">+</div>
-            <div class="slot" data-slot="2">+</div>
-            <div class="slot" data-slot="3">+</div>
+          <div class="bond-canvas">
+            <div id="bondArea" class="bond-area" aria-label="결합 캔버스"></div>
+            <div id="trashBin" class="trash" aria-label="삭제 영역">
+              <span class="trash-icon">🗑</span>
+              <span>삭제</span>
+            </div>
           </div>
+          <p class="hint">원소를 캔버스에 떨어뜨려 배치하고, 드래그로 이동하거나 쓰레기통으로 삭제하세요.</p>
 
           <div class="panel-header">
             <h3>결합 결과</h3>
