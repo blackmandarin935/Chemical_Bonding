@@ -137,7 +137,7 @@ h1 {
 
 .table {
   display: grid;
-  grid-template-columns: repeat(18, minmax(36px, 1fr));
+  grid-template-columns: repeat(18, minmax(32px, 1fr));
   gap: 8px;
   min-width: 0;
 }
@@ -145,12 +145,12 @@ h1 {
 .element {
   background: #2b2320;
   border-radius: 12px;
-  padding: 8px;
+  padding: 6px;
   border: 1px solid rgba(255, 138, 91, 0.25);
   text-align: center;
   cursor: grab;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   user-select: none;
 }
 
@@ -181,12 +181,12 @@ h1 {
 .element .symbol {
   display: block;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .element .number {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
 }
 
 .bond-area {
