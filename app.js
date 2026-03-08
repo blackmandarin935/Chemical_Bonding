@@ -353,11 +353,6 @@ const moleculeNameMapExtra = {
   C2H2O: "케텐"
 };
 
-const moleculeNameMapAll = {
-  ...moleculeNameMap,
-  ...moleculeNameMapExtra
-};
-
 const moleculeNameMap = {
   H2: "수소",
   O2: "산소",
@@ -572,6 +567,11 @@ const moleculeNameMap = {
   PCl3: "삼염화인",
   PCl5: "오염화인",
   SOCl2: "염화티오닐"
+};
+
+const moleculeNameMapAll = {
+  ...moleculeNameMap,
+  ...moleculeNameMapExtra
 };
 
 function getCategory(element) {
