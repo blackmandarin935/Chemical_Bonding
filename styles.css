@@ -115,7 +115,7 @@ h1 {
   padding: 22px;
   border: 1px solid var(--stroke);
   box-shadow: var(--shadow);
-  min-height: 420px;
+  min-height: auto;
 }
 
 .panel-header h2,
@@ -198,7 +198,7 @@ h1 {
 
 .bond-area {
   position: relative;
-  min-height: 220px;
+  min-height: 180px;
   border-radius: 22px;
   border: 2px dashed rgba(255, 138, 91, 0.45);
   background: linear-gradient(135deg, rgba(52, 38, 32, 0.9), rgba(34, 28, 26, 0.9));
@@ -266,9 +266,9 @@ h1 {
 .detail-card {
   background: #2a211e;
   border-radius: 16px;
-  padding: 16px;
+  padding: 12px;
   border: 1px solid rgba(255, 138, 91, 0.2);
-  min-height: 140px;
+  min-height: 110px;
 }
 
 .bond-canvas {
