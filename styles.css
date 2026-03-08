@@ -105,7 +105,7 @@ h1 {
 
 .layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 24px;
 }
 
@@ -131,15 +131,15 @@ h1 {
 }
 
 .table-wrap {
-  overflow-x: auto;
-  padding-bottom: 6px;
+  overflow: visible;
+  padding-bottom: 0;
 }
 
 .table {
   display: grid;
-  grid-template-columns: repeat(18, minmax(40px, 1fr));
+  grid-template-columns: repeat(18, minmax(36px, 1fr));
   gap: 8px;
-  min-width: 880px;
+  min-width: 0;
 }
 
 .element {
@@ -310,10 +310,15 @@ h1 {
 
 @media (max-width: 720px) {
   .table {
-    min-width: 820px;
+    grid-template-columns: repeat(9, minmax(32px, 1fr));
+    gap: 6px;
   }
 
   .panel {
     min-height: auto;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    padding-bottom: 6px;
   }
 }
