@@ -148,12 +148,431 @@ const trashBin = document.getElementById("trashBin");
 const table = document.getElementById("periodicTable");
 const bondType = document.getElementById("bondType");
 const formula = document.getElementById("formula");
+const moleculeName = document.getElementById("moleculeName");
 const bondDescription = document.getElementById("bondDescription");
 const properties = document.getElementById("properties");
 const resetBtn = document.getElementById("resetBtn");
 
 const selectedElements = [];
 const maxNodes = 8;
+let bondLines = null;
+
+const bondOrderMap = {
+  H2: 1,
+  F2: 1,
+  Cl2: 1,
+  Br2: 1,
+  I2: 1,
+  O2: 2,
+  N2: 3,
+  CO: 3,
+  NO: 2,
+  NO2: 2,
+  SO2: 2,
+  C2H2: 3,
+  C2H4: 2,
+  C2H6: 1
+};
+
+const moleculeNameMapExtra = {
+  Br2: "브롬",
+  C10H20: "데센",
+  C10H22: "데칸",
+  C10H8: "나프탈렌",
+  C11H24: "운데칸",
+  C12H22O11: "설탕(자당)",
+  C12H26: "도데칸",
+  C13H18O2: "이부프로펜",
+  C13H28: "트리데칸",
+  C14H28O2: "미리스트산",
+  C14H30: "테트라데칸",
+  C15H32: "펜타데칸",
+  C16H32O2: "팔미트산",
+  C16H34: "헥사데칸",
+  C17H36: "헵타데칸",
+  C18H24O2: "에스트라디올",
+  C18H30O2: "리놀렌산",
+  C18H32O2: "리놀레산",
+  C18H34O2: "올레산",
+  C18H36O2: "스테아르산",
+  C18H38: "옥타데칸",
+  C19H28O2: "테스토스테론",
+  C19H40: "노나데칸",
+  C20H30O2: "비타민 A",
+  C20H32O2: "아라키돈산",
+  C20H42: "아이코산",
+  C21H30O2: "프로게스테론",
+  C27H46O: "콜레스테롤",
+  C28H44O: "비타민 D",
+  C29H50O2: "비타민 E",
+  C31H46O2: "비타민 K",
+  C2H2: "에타인",
+  C2H4: "에텐",
+  C2H4O: "아세트알데히드",
+  C2H4O2: "아세트산",
+  C2H6: "에테인",
+  C2H6O: "에탄올",
+  C2H6O2: "에틸렌글리콜",
+  C3H4: "프로파인",
+  C3H6: "프로펜",
+  C3H6O: "아세톤",
+  C3H6O2: "프로피온산",
+  C3H6O3: "젖산",
+  C3H8: "프로페인",
+  C3H8O: "프로판올",
+  C3H8O2: "프로필렌글리콜",
+  C3H8O3: "글리세롤",
+  C4H10: "부테인",
+  C4H10O: "부탄올",
+  C4H6: "부타인",
+  C4H8: "부텐",
+  C4H8O2: "부티르산",
+  C4H8O4: "에리트로스",
+  C5H10: "펜텐",
+  C5H10O2: "발레르산",
+  C5H10O4: "디옥시리보오스",
+  C5H10O5: "리보오스",
+  C5H12: "펜탄",
+  C5H8: "펜타인",
+  C6H10: "시클로헥센",
+  C6H12: "시클로헥산",
+  C6H12O6: "포도당",
+  C6H14: "헥산",
+  C6H6: "벤젠",
+  C6H8O6: "비타민 C",
+  C7H14: "헵텐",
+  C7H16: "헵탄",
+  C7H8: "톨루엔",
+  C8H10: "자일렌",
+  C8H16: "옥텐",
+  C8H18: "옥탄",
+  C8H8: "스타이렌",
+  C9H18: "노넨",
+  C9H20: "노난",
+  C9H8O4: "아스피린",
+  CH4: "메테인",
+  CHCl3: "클로로포름",
+  CH3Cl: "클로로메탄",
+  CH3OH: "메탄올",
+  Cl2: "염소",
+  CO: "일산화탄소",
+  CO2: "이산화탄소",
+  F2: "플루오린",
+  H2: "수소",
+  H2O: "물",
+  H2O2: "과산화수소",
+  H2S: "황화수소",
+  HBr: "브로민화 수소",
+  HCl: "염화수소",
+  HClO: "차아염소산",
+  HClO2: "아염소산",
+  HClO3: "염소산",
+  HClO4: "과염소산",
+  HCN: "시안화수소",
+  HF: "플루오린화 수소",
+  HI: "요오드화 수소",
+  HNO2: "아질산",
+  HNO3: "질산",
+  H2CO3: "탄산",
+  H2SO3: "아황산",
+  H2SO4: "황산",
+  H3BO3: "붕산",
+  H3PO4: "인산",
+  I2: "아이오딘",
+  N2: "질소",
+  N2O: "아산화질소",
+  N2O3: "삼산화이질소",
+  N2O5: "오산화이질소",
+  NH3: "암모니아",
+  NO: "일산화질소",
+  NO2: "이산화질소",
+  O2: "산소",
+  PCl3: "삼염화인",
+  PCl5: "오염화인",
+  SF6: "육플루오린화황",
+  SiO2: "이산화규소",
+  SO2: "이산화황",
+  SO3: "삼산화황",
+  SOCl2: "염화티오닐",
+  C8H9NO2: "아세트아미노펜",
+  C8H10N4O2: "카페인",
+  C17H19NO3: "모르핀",
+  C21H23NO5: "코데인",
+  C2H3Cl: "염화비닐",
+  C2H2Cl2: "다이클로로에텐",
+  C2HCl3: "트라이클로로에텐",
+  C2Cl4: "테트라클로로에텐",
+  C2H3Br: "브로모에텐",
+  C2H3I: "요오도에텐",
+  C2H3F: "플루오로에텐",
+  C2F4: "테트라플루오로에텐",
+  C2H2F2: "다이플루오로에텐",
+  C6H5OH: "페놀",
+  C6H5NH2: "아닐린",
+  C6H5Cl: "클로로벤젠",
+  C6H5Br: "브로모벤젠",
+  C6H5I: "요오도벤젠",
+  C6H5NO2: "니트로벤젠",
+  C7H8O: "벤질알코올",
+  C7H6O: "벤즈알데하이드",
+  C7H6O2: "벤조산",
+  C8H8O: "아세토페논",
+  C8H8O2: "페닐아세트산",
+  C8H10O: "에틸페놀",
+  C8H10O2: "구아이아콜",
+  C9H10O2: "시나믹산",
+  C9H12O2: "아네톨",
+  C9H8O2: "신나말데하이드",
+  C10H12O: "멘톤",
+  C10H14O: "멘톨",
+  C10H16: "리모넨",
+  C10H16O: "캄퍼",
+  C10H16O2: "캄포르퀴논",
+  C10H18O: "보르네올",
+  C10H16O3: "캄포르산",
+  C6H12O: "시클로헥사논",
+  C6H10O: "시클로헥센온",
+  C6H6O: "페놀(이론식)",
+  C6H6O2: "벤젠디올(카테콜)",
+  C6H6O3: "피로갈롤",
+  C7H6O3: "살리실산",
+  C7H6O5: "갈산",
+  C8H8O3: "바닐린",
+  C9H10O3: "페룰산",
+  C10H12O2: "유제놀",
+  C10H12O4: "바닐릭산",
+  C6H8O7: "구연산",
+  C4H6O4: "숙신산",
+  C2H2O4: "옥살산",
+  C3H4O4: "말론산",
+  C4H4O4: "푸마르산",
+  C4H6O5: "말산",
+  C4H6O6: "타타르산",
+  C2H4O3: "글리옥실산",
+  C2H2O2: "글리옥살",
+  C2H2O: "케텐"
+};
+
+const moleculeNameMapAll = {
+  ...moleculeNameMap,
+  ...moleculeNameMapExtra
+};
+
+const moleculeNameMap = {
+  H2: "수소",
+  O2: "산소",
+  N2: "질소",
+  F2: "플루오린",
+  Cl2: "염소",
+  Br2: "브롬",
+  I2: "아이오딘",
+  H2O: "물",
+  H2O2: "과산화수소",
+  CO2: "이산화탄소",
+  CO: "일산화탄소",
+  CH4: "메테인",
+  C2H6: "에테인",
+  C3H8: "프로페인",
+  C4H10: "부테인",
+  C5H12: "펜탄",
+  C6H14: "헥산",
+  C7H16: "헵탄",
+  C8H18: "옥탄",
+  C9H20: "노난",
+  C10H22: "데칸",
+  C11H24: "운데칸",
+  C12H26: "도데칸",
+  C13H28: "트리데칸",
+  C14H30: "테트라데칸",
+  C15H32: "펜타데칸",
+  C16H34: "헥사데칸",
+  C17H36: "헵타데칸",
+  C18H38: "옥타데칸",
+  C19H40: "노나데칸",
+  C20H42: "아이코산",
+  C2H4: "에텐",
+  C3H6: "프로펜",
+  C4H8: "부텐",
+  C5H10: "펜텐",
+  C6H12: "헥센",
+  C7H14: "헵텐",
+  C8H16: "옥텐",
+  C9H18: "노넨",
+  C10H20: "데센",
+  C2H2: "에타인",
+  C3H4: "프로파인",
+  C4H6: "부타인",
+  C5H8: "펜타인",
+  C6H6: "벤젠",
+  C7H8: "톨루엔",
+  C8H10: "자일렌",
+  C8H8: "스타이렌",
+  C10H8: "나프탈렌",
+  C6H12: "시클로헥산",
+  C6H10: "시클로헥센",
+  C5H10: "시클로펜탄",
+  C5H8: "시클로펜텐",
+  NH3: "암모니아",
+  H2S: "황화수소",
+  HCl: "염화수소",
+  HBr: "브로민화 수소",
+  HI: "요오드화 수소",
+  HF: "플루오린화 수소",
+  NO: "일산화질소",
+  NO2: "이산화질소",
+  N2O: "아산화질소",
+  N2O3: "삼산화이질소",
+  N2O5: "오산화이질소",
+  SO2: "이산화황",
+  SO3: "삼산화황",
+  HNO3: "질산",
+  HNO2: "아질산",
+  H2SO4: "황산",
+  H2SO3: "아황산",
+  H3PO4: "인산",
+  H2CO3: "탄산",
+  HClO: "차아염소산",
+  HClO2: "아염소산",
+  HClO3: "염소산",
+  HClO4: "과염소산",
+  HCN: "시안화수소",
+  NaCl: "염화나트륨",
+  KCl: "염화칼륨",
+  MgCl2: "염화마그네슘",
+  CaCl2: "염화칼슘",
+  AlCl3: "염화알루미늄",
+  NaF: "불화나트륨",
+  KF: "불화칼륨",
+  CaF2: "불화칼슘",
+  NaBr: "브로민화나트륨",
+  KBr: "브로민화칼륨",
+  NaI: "요오드화나트륨",
+  KI: "요오드화칼륨",
+  NaOH: "수산화나트륨",
+  KOH: "수산화칼륨",
+  CaH2O2: "수산화칼슘",
+  MgH2O2: "수산화마그네슘",
+  AlH3O3: "수산화알루미늄",
+  Na2CO3: "탄산나트륨",
+  NaHCO3: "탄산수소나트륨",
+  CaCO3: "탄산칼슘",
+  MgCO3: "탄산마그네슘",
+  Na2SO4: "황산나트륨",
+  K2SO4: "황산칼륨",
+  MgO4S: "황산마그네슘",
+  CaO4S: "황산칼슘",
+  BaO4S: "황산바륨",
+  NaNO3: "질산나트륨",
+  KNO3: "질산칼륨",
+  NH4NO3: "질산암모늄",
+  NH4Cl: "염화암모늄",
+  NH4O: "수산화암모늄",
+  Na2S: "황화나트륨",
+  K2S: "황화칼륨",
+  Na2SO3: "아황산나트륨",
+  NaHO3S: "아황산수소나트륨",
+  K2SO3: "아황산칼륨",
+  NaClO: "차아염소산나트륨",
+  NaClO2: "아염소산나트륨",
+  NaClO3: "염소산나트륨",
+  NaClO4: "과염소산나트륨",
+  KClO3: "염소산칼륨",
+  KClO4: "과염소산칼륨",
+  KMnO4: "과망간산칼륨",
+  K2Cr2O7: "중크롬산칼륨",
+  Na2Cr2O7: "중크롬산나트륨",
+  Na2CrO4: "크롬산나트륨",
+  Na2B4O7: "붕사",
+  H3BO3: "붕산",
+  NaBO2: "메타붕산나트륨",
+  Na2O2: "과산화나트륨",
+  K2O2: "과산화칼륨",
+  CaO2: "과산화칼슘",
+  FeO: "산화철(II)",
+  Fe2O3: "산화철(III)",
+  CuO: "산화구리(II)",
+  Cu2O: "산화구리(I)",
+  ZnO: "산화아연",
+  Al2O3: "산화알루미늄",
+  SiO2: "이산화규소",
+  CaO: "산화칼슘",
+  MgO: "산화마그네슘",
+  Na2O: "산화나트륨",
+  K2O: "산화칼륨",
+  Na2O12S3: "황산알루미늄(나트륨염)",
+  Al2O12S3: "황산알루미늄",
+  FeO4S: "황산철(II)",
+  Fe2O12S3: "황산철(III)",
+  CuO4S: "황산구리(II)",
+  ZnO4S: "황산아연",
+  PbO4S: "황산납",
+  AgNO3: "질산은",
+  BaCl2: "염화바륨",
+  Na2SiO3: "규산나트륨",
+  H2SiO3: "규산",
+  Ca3O8P2: "인산칼슘",
+  Na3PO4: "인산삼나트륨",
+  K3PO4: "인산삼칼륨",
+  H5CNO3: "탄산수소암모늄",
+  Na2S2O3: "티오황산나트륨",
+  H2S2O3: "티오황산",
+  Na2S2O5: "피로아황산나트륨",
+  Na2S2O7: "피로황산나트륨(무수)",
+  AlK2O8S2: "백반",
+  CH3OH: "메탄올",
+  C2H6O: "에탄올",
+  C3H8O: "프로판올",
+  C4H10O: "부탄올",
+  C2H6O2: "에틸렌글리콜",
+  C3H8O2: "프로필렌글리콜",
+  C3H8O3: "글리세롤",
+  C3H6O: "아세톤",
+  C2H4O: "아세트알데히드",
+  C2H4O2: "아세트산",
+  C3H6O2: "프로피온산",
+  C4H8O2: "부티르산",
+  C5H10O2: "발레르산",
+  C6H12O2: "카프로산",
+  C7H14O2: "에난산",
+  C8H16O2: "카프릴산",
+  C9H18O2: "펠라곤산",
+  C10H20O2: "카프르산",
+  C12H24O2: "라우르산",
+  C14H28O2: "미리스트산",
+  C16H32O2: "팔미트산",
+  C18H36O2: "스테아르산",
+  C18H34O2: "올레산",
+  C18H32O2: "리놀레산",
+  C18H30O2: "리놀렌산",
+  C20H32O2: "아라키돈산",
+  C6H12O6: "포도당",
+  C12H22O11: "설탕(자당)",
+  C5H10O5: "리보오스",
+  C5H10O4: "디옥시리보오스",
+  C4H8O4: "에리트로스",
+  C6H8O6: "비타민 C",
+  C20H30O2: "비타민 A",
+  C28H44O: "비타민 D",
+  C29H50O2: "비타민 E",
+  C31H46O2: "비타민 K",
+  C9H8O4: "아스피린",
+  C8H9NO2: "아세트아미노펜",
+  C13H18O2: "이부프로펜",
+  C8H10N4O2: "카페인",
+  C27H46O: "콜레스테롤",
+  C21H30O2: "프로게스테론",
+  C19H28O2: "테스토스테론",
+  C18H24O2: "에스트라디올",
+  C2H5Cl: "클로로에탄",
+  CH3Cl: "클로로메탄",
+  CHCl3: "클로로포름",
+  CCl4: "사염화탄소",
+  CF4: "사플루오로메탄",
+  SF6: "육플루오린화황",
+  PCl3: "삼염화인",
+  PCl5: "오염화인",
+  SOCl2: "염화티오닐"
+};
 
 function getCategory(element) {
   if (metalloidSymbols.has(element.symbol)) {
@@ -173,7 +592,7 @@ function renderTable() {
     const card = document.createElement("div");
     const category = getCategory(element);
     card.className = `element ${category}`;
-    card.draggable = true;
+    card.draggable = false;
     card.style.gridColumn = element.col;
     card.style.gridRow = element.row;
     card.dataset.symbol = element.symbol;
@@ -183,8 +602,8 @@ function renderTable() {
       <span class="name">${element.name}</span>
     `;
 
-    card.addEventListener("dragstart", (event) => {
-      event.dataTransfer.setData("text/plain", element.symbol);
+    card.addEventListener("pointerdown", (event) => {
+      startElementDrag(event, element);
     });
 
     grid.appendChild(card);
@@ -194,30 +613,78 @@ function renderTable() {
   grid.id = "periodicTable";
 }
 
-function setupCanvas() {
-  bondArea.addEventListener("dragover", (event) => {
-    event.preventDefault();
-    bondArea.classList.add("drag-over");
-  });
+let dragGhost = null;
+let dragElement = null;
+let isDraggingElement = false;
 
-  bondArea.addEventListener("dragleave", () => {
-    bondArea.classList.remove("drag-over");
-  });
+function startElementDrag(event, element) {
+  if (selectedElements.length >= maxNodes) {
+    return;
+  }
 
-  bondArea.addEventListener("drop", (event) => {
-    event.preventDefault();
-    bondArea.classList.remove("drag-over");
-    const symbol = event.dataTransfer.getData("text/plain");
-    const element = elements.find((item) => item.symbol === symbol);
-    if (!element) return;
-    if (selectedElements.length >= maxNodes) return;
-    const rect = bondArea.getBoundingClientRect();
+  isDraggingElement = true;
+  dragElement = element;
+
+  dragGhost = document.createElement("div");
+  dragGhost.className = "bond-node";
+  dragGhost.style.position = "fixed";
+  dragGhost.style.pointerEvents = "none";
+  dragGhost.style.zIndex = "9999";
+  dragGhost.innerHTML = `
+    <div>
+      <div class="symbol">${element.symbol}</div>
+      <div class="number">${element.number}</div>
+    </div>
+  `;
+
+  document.body.appendChild(dragGhost);
+  moveGhost(event.clientX, event.clientY);
+
+  document.addEventListener("pointermove", handleElementDrag);
+  document.addEventListener("pointerup", endElementDrag);
+}
+
+function moveGhost(x, y) {
+  if (!dragGhost) return;
+  const size = 72;
+  dragGhost.style.left = `${x - size / 2}px`;
+  dragGhost.style.top = `${y - size / 2}px`;
+}
+
+function handleElementDrag(event) {
+  if (!isDraggingElement) return;
+  moveGhost(event.clientX, event.clientY);
+}
+
+function endElementDrag(event) {
+  if (!isDraggingElement) return;
+  isDraggingElement = false;
+
+  const rect = bondArea.getBoundingClientRect();
+  const inCanvas =
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+
+  if (inCanvas && dragElement) {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    addBondNode(element, x, y);
+    addBondNode(dragElement, x, y);
     updateBonding();
-  });
+  }
 
+  if (dragGhost) {
+    dragGhost.remove();
+  }
+  dragGhost = null;
+  dragElement = null;
+
+  document.removeEventListener("pointermove", handleElementDrag);
+  document.removeEventListener("pointerup", endElementDrag);
+}
+
+function setupCanvas() {
   trashBin.addEventListener("dragover", (event) => {
     event.preventDefault();
     trashBin.classList.add("active");
@@ -243,7 +710,154 @@ function setupCanvas() {
   });
 }
 
+function ensureBondLines() {
+  if (bondLines) return;
+  bondLines = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  bondLines.classList.add("bond-lines");
+  bondArea.appendChild(bondLines);
+}
+
+function arrangeNodes() {
+  const nodes = Array.from(bondArea.querySelectorAll(".bond-node"));
+  if (nodes.length === 0) {
+    drawBondLines();
+    return;
+  }
+
+  const rect = bondArea.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const size = 72;
+  const radius = Math.max(40, Math.min(rect.width, rect.height) / 2 - size);
+
+  if (nodes.length === 1) {
+    positionNode(nodes[0], centerX - size / 2, centerY - size / 2);
+    drawBondLines();
+    return;
+  }
+
+  if (nodes.length === 2) {
+    positionNode(nodes[0], centerX - size - 8, centerY - size / 2);
+    positionNode(nodes[1], centerX + 8, centerY - size / 2);
+    drawBondLines();
+    return;
+  }
+
+  if (nodes.length === 3) {
+    const points = trianglePoints(centerX, centerY, radius * 0.7);
+    nodes.forEach((node, index) => {
+      positionNode(node, points[index].x - size / 2, points[index].y - size / 2);
+    });
+    drawBondLines();
+    return;
+  }
+
+  if (nodes.length === 4) {
+    const points = squarePoints(centerX, centerY, radius * 0.7);
+    nodes.forEach((node, index) => {
+      positionNode(node, points[index].x - size / 2, points[index].y - size / 2);
+    });
+    drawBondLines();
+    return;
+  }
+
+  const angleStep = (Math.PI * 2) / nodes.length;
+  nodes.forEach((node, index) => {
+    const angle = -Math.PI / 2 + angleStep * index;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    positionNode(node, x - size / 2, y - size / 2);
+  });
+  drawBondLines();
+}
+
+function positionNode(node, x, y) {
+  const rect = bondArea.getBoundingClientRect();
+  const size = 72;
+  const clampedX = Math.min(Math.max(x, 0), rect.width - size);
+  const clampedY = Math.min(Math.max(y, 0), rect.height - size);
+  node.style.left = `${clampedX}px`;
+  node.style.top = `${clampedY}px`;
+}
+
+function trianglePoints(cx, cy, r) {
+  return [
+    { x: cx, y: cy - r },
+    { x: cx - r * 0.9, y: cy + r * 0.6 },
+    { x: cx + r * 0.9, y: cy + r * 0.6 }
+  ];
+}
+
+function squarePoints(cx, cy, r) {
+  return [
+    { x: cx - r, y: cy - r },
+    { x: cx + r, y: cy - r },
+    { x: cx + r, y: cy + r },
+    { x: cx - r, y: cy + r }
+  ];
+}
+
+function drawBondLines() {
+  if (!bondLines) return;
+  bondLines.innerHTML = "";
+
+  const nodes = Array.from(bondArea.querySelectorAll(".bond-node"));
+  if (nodes.length < 2) return;
+
+  const currentFormula = createFormula(selectedElements.map((item) => item.element));
+  const order = bondOrderMap[currentFormula] || 1;
+
+  const centers = nodes.map((node) => {
+    const rect = node.getBoundingClientRect();
+    const areaRect = bondArea.getBoundingClientRect();
+    return {
+      x: rect.left - areaRect.left + rect.width / 2,
+      y: rect.top - areaRect.top + rect.height / 2
+    };
+  });
+
+  const center = centers[0];
+  centers.slice(1).forEach((point) => {
+    if (nodes.length === 2 && order > 1) {
+      drawMultipleBond(center, point, order);
+    } else {
+      drawSingleBond(center, point);
+    }
+  });
+}
+
+function drawSingleBond(a, b) {
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", a.x);
+  line.setAttribute("y1", a.y);
+  line.setAttribute("x2", b.x);
+  line.setAttribute("y2", b.y);
+  line.setAttribute("stroke", "rgba(255, 138, 91, 0.65)");
+  line.setAttribute("stroke-width", "2");
+  line.setAttribute("stroke-linecap", "round");
+  bondLines.appendChild(line);
+}
+
+function drawMultipleBond(a, b, order) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const offsetX = (-dy / length) * 4;
+  const offsetY = (dx / length) * 4;
+
+  if (order === 2) {
+    drawSingleBond({ x: a.x - offsetX, y: a.y - offsetY }, { x: b.x - offsetX, y: b.y - offsetY });
+    drawSingleBond({ x: a.x + offsetX, y: a.y + offsetY }, { x: b.x + offsetX, y: b.y + offsetY });
+    return;
+  }
+
+  drawSingleBond(a, b);
+  drawSingleBond({ x: a.x - offsetX * 1.4, y: a.y - offsetY * 1.4 }, { x: b.x - offsetX * 1.4, y: b.y - offsetY * 1.4 });
+  drawSingleBond({ x: a.x + offsetX * 1.4, y: a.y + offsetY * 1.4 }, { x: b.x + offsetX * 1.4, y: b.y + offsetY * 1.4 });
+}
+
 function addBondNode(element, x, y) {
+  ensureBondLines();
   const node = document.createElement("div");
   node.className = "bond-node";
   node.dataset.symbol = element.symbol;
@@ -271,6 +885,7 @@ function addBondNode(element, x, y) {
   enableNodeDrag(node);
   bondArea.appendChild(node);
   selectedElements.push({ id: node.dataset.nodeId, element });
+  arrangeNodes();
 }
 
 function enableNodeDrag(node) {
@@ -296,6 +911,7 @@ function enableNodeDrag(node) {
     const clampedY = Math.min(Math.max(y, 0), areaRect.height - size);
     node.style.left = `${clampedX}px`;
     node.style.top = `${clampedY}px`;
+    drawBondLines();
   });
 
   node.addEventListener("pointerup", () => {
@@ -313,10 +929,19 @@ function createFormula(choices) {
     return acc;
   }, {});
 
-  return Object.keys(counts)
-    .sort()
-    .map((symbol) => `${symbol}${counts[symbol] > 1 ? counts[symbol] : ""}`)
-    .join("");
+  const symbols = Object.keys(counts);
+  const hasCarbon = symbols.includes("C");
+
+  let ordered = [];
+  if (hasCarbon) {
+    ordered = ["C", "H"].filter((symbol) => symbols.includes(symbol));
+    const rest = symbols.filter((symbol) => !ordered.includes(symbol)).sort();
+    ordered = ordered.concat(rest);
+  } else {
+    ordered = symbols.sort();
+  }
+
+  return ordered.map((symbol) => `${symbol}${counts[symbol] > 1 ? counts[symbol] : ""}`).join("");
 }
 
 function detectBondType(choices) {
@@ -407,23 +1032,32 @@ function updateBonding() {
   if (choices.length === 0) {
     bondType.textContent = "-";
     formula.textContent = "-";
+    moleculeName.textContent = "-";
     bondDescription.textContent = "원소를 놓아주세요.";
     properties.innerHTML = "";
+    drawBondLines();
     return;
   }
 
   const bondInfo = detectBondType(choices);
   bondType.textContent = bondInfo.type;
-  formula.textContent = createFormula(choices);
+  const formulaText = createFormula(choices);
+  formula.textContent = formulaText;
+  moleculeName.textContent = moleculeNameMapAll[formulaText] || "-";
   bondDescription.textContent = bondInfo.detail;
 
   const items = getProperties(choices, bondInfo);
   properties.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+  arrangeNodes();
+  drawBondLines();
 }
 
 function resetAll() {
   selectedElements.length = 0;
   bondArea.querySelectorAll(".bond-node").forEach((node) => node.remove());
+  if (bondLines) {
+    bondLines.innerHTML = "";
+  }
   updateBonding();
 }
 
@@ -431,4 +1065,5 @@ resetBtn.addEventListener("click", resetAll);
 
 renderTable();
 setupCanvas();
+ensureBondLines();
 updateBonding();
