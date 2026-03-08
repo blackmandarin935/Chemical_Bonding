@@ -56,26 +56,31 @@
             <h2>결합 공간</h2>
             <p>최대 8개의 원소를 결합해 간단한 분자를 만들 수 있어요.</p>
           </div>
-          <div class="bond-canvas">
-            <div id="bondArea" class="bond-area" aria-label="결합 캔버스"></div>
-            <div id="trashBin" class="trash" aria-label="삭제 영역">
-              <span class="trash-icon">🗑</span>
-              <span>삭제</span>
+          <div class="bond-section">
+            <div>
+              <div class="bond-canvas">
+                <div id="bondArea" class="bond-area" aria-label="결합 캔버스"></div>
+                <div id="trashBin" class="trash" aria-label="삭제 영역">
+                  <span class="trash-icon">🗑</span>
+                  <span>삭제</span>
+                </div>
+              </div>
+              <p class="hint">원소를 캔버스에 놓으면 안정적인 배치로 자동 정렬됩니다. 쓰레기통으로 삭제하세요.</p>
             </div>
-          </div>
-          <p class="hint">원소를 캔버스에 놓으면 안정적인 배치로 자동 정렬됩니다. 쓰레기통으로 삭제하세요.</p>
-
-          <div class="panel-header">
-            <h3>결합 결과</h3>
-          </div>
-          <div id="bondDetails" class="details">
-            <div class="detail-card">
-              <h4>결합 유형</h4>
-              <p id="bondDescription">원소를 놓아주세요.</p>
-            </div>
-            <div class="detail-card">
-              <h4>분자 특성</h4>
-              <ul id="properties"></ul>
+            <div>
+              <div class="panel-header">
+                <h3>결합 결과</h3>
+              </div>
+              <div id="bondDetails" class="details">
+                <div class="detail-card">
+                  <h4>결합 유형</h4>
+                  <p id="bondDescription">원소를 놓아주세요.</p>
+                </div>
+                <div class="detail-card">
+                  <h4>분자 특성</h4>
+                  <ul id="properties"></ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>
