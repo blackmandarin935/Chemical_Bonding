@@ -33,7 +33,7 @@ body {
 
 .hero {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: 28px;
   align-items: center;
   margin-bottom: 36px;
@@ -137,20 +137,20 @@ h1 {
 
 .table {
   display: grid;
-  grid-template-columns: repeat(18, minmax(30px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(18, minmax(28px, 1fr));
+  gap: 5px;
   min-width: 0;
 }
 
 .element {
   background: #2b2320;
   border-radius: 12px;
-  padding: 5px;
+  padding: 4px;
   border: 1px solid rgba(255, 138, 91, 0.25);
   text-align: center;
   cursor: grab;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   user-select: none;
 }
 
@@ -181,12 +181,12 @@ h1 {
 .element .symbol {
   display: block;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .element .number {
   color: var(--muted);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
 }
 
 .bond-section {
@@ -332,4 +332,7 @@ h1 {
   .bond-section {
     grid-template-columns: 1fr;
   }
+}
+.bond-side .hero-card {
+  margin-bottom: 18px;
 }
